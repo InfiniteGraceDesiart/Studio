@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>InfiniteGraceDesiArt — Listing Studio v5</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { background: #faf9f6; color: #1f2937; font-family: ui-sans-serif, system-ui, sans-serif; }
+    .card { background: #fff; border: 1px solid #ece8e1; border-radius: 14px; box-shadow: 0 2px 8px rgba(0,0,0,0.03); }
+    .shot-done { opacity: .68; border-color: #bbf7d0; background: #f8fff9; }
+    textarea { resize: vertical; }
+  </style>
+</head>
+<body class="min-h-screen pb-14">
+
+  <header class="bg-white border-b border-stone-200 sticky top-0 z-30">
+    <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-2">
+      <div>
+        <div class="flex items-center gap-2">
+          <span class="w-2.5 h-2.5 rounded-full bg-amber-600 inline-block"></span>
+          <h1 class="text-base sm:text-lg font-semibold text-stone-900">InfiniteGraceDesiArt — Listing Studio</h1>
+          <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">v5 • Magazine WOW</span>
+        </div>
+        <p class="text-xs text-stone-500">Nano Banana / Gemini AI Studio • infinitegracedesiart.etsy.com</p>
+      </div>
+      <div class="flex flex-wrap items-center gap-2">
+        <select id="productCategory" class="text-xs border border-stone-300 rounded-lg px-2.5 py-1.5 bg-white">
+          <option value="wall_art" selected>Product: Wall Art (1–3 Pieces)</option>
+          <option value="greeting_cards" disabled>Greeting Cards (Phase 2)</option>
+          <option value="calendars" disabled>Calendars (Phase 2)</option>
+          <option value="patterns" disabled>Seamless Patterns (Phase 2)</option>
+          <option value="png_clipart" disabled>PNG Clipart (Phase 2)</option>
+        </select>
+        <select id="roomPack" class="text-xs border border-stone-300 rounded-lg px-2.5 py-1.5 bg-white">
+          <option value="luxury_home">Rooms: Luxury Home (8)</option>
+          <option value="nursery_kids">Rooms: Nursery &amp; Kids</option>
+          <option value="custom">Rooms: Custom</option>
+        </select>
+        <a href="https://aistudio.google.com/" target="_blank" rel="noopener" class="bg-amber-700 hover:bg-amber-800 text-white text-xs font-medium rounded-lg px-3 py-1.5">🍌 Open AI Studio</a>
+        <a href="https://gemini.google.com/" target="_blank" rel="noopener" class="text-xs border border-stone-300 rounded-lg px-3 py-1.5 hover:bg-stone-50">✨ Open Gemini</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto px-4 mt-5 space-y-5">
+    <div id="errBanner" class="hidden bg-rose-50 border border-rose-300 text-rose-800 rounded-xl p-3 text-xs"></div>
+
+    <div class="bg-amber-50 border border-amber-200 rounded-xl p-3 text-xs text-amber-950 flex flex-wrap items-center justify-between gap-2">
+      <div><strong>2-Step Flow:</strong> 1) Generate <strong>#1 (Hero)</strong> with Art → 2) Upload Hero into Box #2, then run #2–#14 attaching <strong>Art + Hero</strong> (Aspect Ratio <strong>1:1</strong>). Every room now has full editorial luxury styling baked in.</div>
+      <div class="flex items-center gap-2">
+        <span id="progressCounter" class="font-semibold bg-white px-2.5 py-1 rounded border border-amber-200">0 / 16 Done</span>
+        <button id="resetListingBtn" class="underline text-amber-900">New Listing Reset</button>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+      <section class="card p-4 lg:col-span-5 space-y-3.5">
+        <div class="flex items-center justify-between">
+          <h2 class="font-semibold text-sm text-stone-900">1. Upload Wall Art (1–3 Pieces)</h2>
+          <span id="pieceCountBadge" class="text-xs px-2 py-0.5 rounded-full bg-stone-100">0 / 3</span>
+        </div>
+        <div class="grid grid-cols-3 gap-2.5" id="artSlots"></div>
+
+        <div class="border-2 border-amber-300 bg-amber-50/60 rounded-xl p-3 space-y-2">
+          <div class="flex items-center justify-between">
+            <div>
+              <h3 class="text-xs font-semibold text-stone-900">2. Upload Approved Hero Image (After #1)</h3>
+              <p class="text-[11px] text-stone-600">Locks your Hero aesthetic &amp; color harmony across #2–#14.</p>
+            </div>
+            <span id="heroBadge" class="text-[10px] px-2 py-0.5 rounded-full bg-stone-200 text-stone-700">Waiting</span>
+          </div>
+          <div id="heroSlot"></div>
+        </div>
+
+        <div class="bg-stone-50 border border-stone-200 rounded-lg p-2.5 space-y-1">
+          <div class="flex justify-between items-center">
+            <label class="text-xs font-semibold">Print Proportion Lock:</label>
+            <span id="detectedRatioTag" class="text-[11px] text-emerald-700">Auto-detect</span>
+          </div>
+          <select id="artRatioSelect" class="w-full text-xs border border-stone-300 rounded px-2 py-1 bg-white">
+            <option value="vertical_2_3" selected>Tall Vertical — 2:3 (24×36" / 16×24")</option>
+            <option value="vertical_4_5">Vertical — 4:5 or 3:4 (16×20" / 18×24")</option>
+            <option value="square_1_1">Square — 1:1</option>
+            <option value="horizontal_3_2">Horizontal — 3:2 or 4:3</option>
+          </select>
+        </div>
+
+        <div id="swatchSection" class="hidden bg-stone-50 border border-stone-200 rounded-lg p-2.5 space-y-1.5">
+          <div class="flex justify-between text-xs"><span class="font-semibold">Detected Palette:</span><span id="toneLabel" class="text-amber-700"></span></div>
+          <div id="swatchRow" class="flex flex-wrap gap-1.5"></div>
+        </div>
+      </section>
+
+      <section class="card p-4 lg:col-span-7 space-y-3">
+        <div class="flex flex-wrap justify-between items-center gap-2">
+          <div>
+            <h2 class="font-semibold text-sm text-stone-900">3. Art Evaluation &amp; 2027 Magazine Luxury DNA</h2>
+            <p class="text-xs text-stone-500">Injects color-matched throws, pillows, travertine, bouclé &amp; sculpted floral urns into every room.</p>
+          </div>
+          <button id="copyEvalHelperBtn" class="text-xs border border-stone-300 rounded-lg px-2.5 py-1 hover:bg-stone-50">✨ Copy Free Gemini Evaluator</button>
+        </div>
+
+        <div class="flex flex-wrap gap-1.5" id="vibeTags">
+          <button data-vibe="floral" class="vibe-btn text-xs px-2.5 py-1 rounded-full border border-stone-300 bg-white">🌸 Florals</button>
+          <button data-vibe="botanical" class="vibe-btn text-xs px-2.5 py-1 rounded-full border border-stone-300 bg-white">🌿 Botanical</button>
+          <button data-vibe="coastal" class="vibe-btn text-xs px-2.5 py-1 rounded-full border border-stone-300 bg-white">🌊 Coastal</button>
+          <button data-vibe="abstract" class="vibe-btn text-xs px-2.5 py-1 rounded-full border border-stone-300 bg-white">🎨 Abstract</button>
+          <button data-vibe="vintage" class="vibe-btn text-xs px-2.5 py-1 rounded-full border border-stone-300 bg-white">🏛️ Vintage</button>
+          <button data-vibe="nursery" class="vibe-btn text-xs px-2.5 py-1 rounded-full border border-amber-300 bg-amber-50 text-amber-900">🧸 Nursery / Kids</button>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs">
+          <div>
+            <label class="block font-medium text-stone-600 mb-1">Evaluated Art Colors (Echoed in Pillows/Vessels)</label>
+            <input id="evalColors" type="text" class="w-full border border-stone-300 rounded-lg px-2.5 py-1.5" value="warm terracotta, cobalt blue, protea rose, eucalyptus sage, ivory" />
+          </div>
+          <div>
+            <label class="block font-medium text-stone-600 mb-1">Interior Aesthetic</label>
+            <input id="evalStyle" type="text" class="w-full border border-stone-300 rounded-lg px-2.5 py-1.5" value="Architectural Digest 2027 Quiet Luxury magazine editorial" />
+          </div>
+          <div>
+            <label class="block font-medium text-stone-600 mb-1">2027 Luxury Materials &amp; Textures</label>
+            <input id="evalTrend" type="text" class="w-full border border-stone-300 rounded-lg px-2.5 py-1.5" value="honed travertine, fluted white oak, curved bouclé upholstery, chunky knit &amp; cashmere throws, brushed champagne brass" />
+          </div>
+          <div>
+            <label class="block font-medium text-stone-600 mb-1">Suggested Frame Finish</label>
+            <input id="evalFrame" type="text" class="w-full border border-stone-300 rounded-lg px-2.5 py-1.5" value="slim brushed champagne brass or warm natural oak" />
+          </div>
+          <div class="sm:col-span-2">
+            <label class="block font-medium text-stone-600 mb-1">Luxury Florals &amp; Styling Props (Clear of Frame)</label>
+            <input id="evalProps" type="text" class="w-full border border-stone-300 rounded-lg px-2.5 py-1.5" value="sculpted marble urns overflowing with lush white peonies &amp; garden roses, white orchids, colored fluted glass/ceramic accents" />
+          </div>
+        </div>
+
+        <div class="bg-stone-50 border border-stone-200 rounded-lg p-2.5 text-[11px] text-stone-600">
+          <strong>Locked Invariants:</strong> 1:1 AR • Max 24×36" • White walls • No mat • No windows, passages, skylights, or side views • NO wall lights/sconces • Light &amp; airy • Never describes art (uses <code>"the attached image to be placed"</code>).
+        </div>
+
+        <div class="flex justify-end">
+          <button id="rebuildPromptsBtn" class="bg-stone-900 text-white text-xs font-medium px-3.5 py-1.5 rounded-lg">🔄 Refresh Prompts</button>
+        </div>
+      </section>
+    </div>
+
+    <section class="card p-4 space-y-2.5">
+      <div class="flex justify-between items-center">
+        <div>
+          <h2 class="font-semibold text-sm text-stone-900">4. Saved Reference Vault (Upload Once — Saved in Browser)</h2>
+          <p class="text-xs text-stone-500">Recurring references for Shots #9, #10, #12, and #13.</p>
+        </div>
+        <button id="clearRefsBtn" class="text-xs text-rose-600 underline">Clear Refs</button>
+      </div>
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3" id="refVaultGrid"></div>
+    </section>
+
+    <section class="card p-4 space-y-2">
+      <div class="flex justify-between items-center">
+        <h2 class="font-semibold text-sm text-stone-900">5. Room Types &amp; Specifics (#1–#8)</h2>
+        <button id="toggleRoomEditorBtn" class="text-xs border border-stone-300 rounded-lg px-2.5 py-1">Edit Rooms</button>
+      </div>
+      <div id="roomEditorGrid" class="hidden grid grid-cols-1 md:grid-cols-2 gap-2.5 pt-2"></div>
+    </section>
+
+    <section class="space-y-3">
+      <div class="flex flex-wrap justify-between items-center gap-2">
+        <h2 class="text-base font-semibold text-stone-900">6. All 16 Ready-to-Paste Prompts (Magazine WOW First Try)</h2>
+        <button id="copyAllBtn" class="text-xs border border-stone-300 bg-white rounded-lg px-3 py-1.5 font-medium">📋 Copy All 16</button>
+      </div>
+      <div id="shotsGrid" class="grid grid-cols-1 lg:grid-cols-2 gap-4"></div>
+    </section>
+  </main>
+
+  <script>
+    window.onerror = function(msg) {
+      var b = document.getElementById("errBanner");
+      if (b) { b.textContent = "Script error: " + msg; b.classList.remove("hidden"); }
+    };
+    function safeLoadVault() { try { return JSON.parse(localStorage.getItem("igda_refVault") || "{}"); } catch (e) { return {}; } }
+    function safeSaveVault(v) { try { localStorage.setItem("igda_refVault", JSON.stringify(v)); } catch (e) {} }
+
+    const RATIO_DESC = {
+      vertical_2_3: "tall 2:3 vertical portrait proportion (max 24×36 inches—clearly taller than wide, never squared or cropped)",
+      vertical_4_5: "vertical portrait proportion (4:5 or 3:4—clearly taller than wide, never squared or cropped)",
+      square_1_1: "1:1 square proportion (equal height and width, never cropped)",
+      horizontal_3_2: "horizontal landscape proportion (wider than tall, never cropped or squared)"
+    };
+
+    const ROOM_PACKS = {
+      luxury_home: [
+        { id: "hero_console", num: "1", title: "Hero — Art Over Console Table", room: "Designer Console Vignette",
+          specifics: "Closer editorial crop centered on the framed art above an ultra-luxurious honed travertine console table (STRICTLY NO BOOKS anywhere). Tucked beneath is a soft bouclé bench styled with a casually draped cashmere throw and an accent pillow echoing the artwork's warmest color. On the outer edges of the console (clear of the frame), place a white orchid or lush fresh blooms in an artisan ceramic vessel on one side and a jewel-toned fluted glass/ceramic accent echoing the art's secondary tone on the other." },
+        { id: "bedroom", num: "2", title: "Bedroom", room: "Architectural Digest Luxury Bedroom",
+          specifics: "Feature a bespoke curved bouclé upholstered bed dressed in crisp hotel-grade white linen, richly layered with euro pillows, a textured accent pillow echoing the Hero's warm/accent tones, and a chunky knit or cashmere throw draped luxuriously across the foot over a plush textured wool rug. Flank the bed with two sculptural fluted travertine bedside tables, each topped with a sculpted marble urn vase overflowing with lush fresh peonies and garden roses plus a subtle brushed-brass tray accent." },
+        { id: "kitchen", num: "3", title: "Kitchen", room: "Designer Luxury Kitchen",
+          specifics: "Feature dramatic honed veined marble countertops and subtle matching backsplash, warm fluted oak cabinetry accent, unlacquered brushed-brass faucet, and curated luxury kitchen items (artisan walnut cutting board, stoneware canisters, sculptural ceramic bowl of fresh fruit/citrus, fresh herbs in a ceramic vessel, and draped textured linen towel echoing the Hero's color accents)." },
+        { id: "bathroom", num: "4", title: "Bathroom", room: "Spa-Grade Luxury Bathroom",
+          specifics: "Feature a sculptural honed travertine vanity (or freestanding stone soaking tub edge), brushed champagne-brass fixtures, plush rolled & folded white hotel towels accented with a subtle colored hand towel matching the Hero palette, artisan amber/stoneware apothecary bottles on a marble tray, and a sculpted stone vase with lush fresh white blooms and eucalyptus." },
+        { id: "office", num: "5", title: "Home Office", room: "Editorial Designer Home Office",
+          specifics: "Feature a sculptural honed travertine or fluted oak desk paired with a curved bouclé desk chair (with a soft cashmere throw draped over one corner) resting on a textured wool rug, a sleek open laptop with a realistic bright screen, a designer linen notepad and brass pen, a sculpted ceramic vase overflowing with lush fresh flowers echoing the Hero palette, and a ceramic cup of frothy cappuccino on a stone saucer." },
+        { id: "dining", num: "6", title: "Dining Room", room: "Architectural Digest Dining Room",
+          specifics: "Feature a sculptural honed travertine or warm white-oak dining table surrounded by curved bouclé upholstered dining chairs over a plush woven rug, styled with a lush low-profile marble urn centerpiece of fresh peonies & greenery, handmade ceramic plates, linen napkins in an accent tone from the Hero, and subtle brushed-brass details." },
+        { id: "entryway", num: "7", title: "Entryway", room: "Luxury Gallery Entryway",
+          specifics: "Feature a bespoke curved bouclé & warm wood gallery bench layered with a color-matched accent pillow and draped knit/cashmere throw, resting on a textured designer runner rug over light European oak floors, with a sculptural stone floor urn holding airy fresh branches positioned neatly beside the bench (clear of the frame)." },
+        { id: "living", num: "8", title: "Living Room", room: "Architectural Digest Living Room",
+          specifics: "Feature a deep, curved bouclé designer sofa richly layered with textured accent pillows (echoing the Hero's color accents) and a casually draped chunky knit/cashmere throw, paired with a sculptural travertine coffee table styled with curated art books, handmade ceramic bowls, and a sculpted marble urn overflowing with lush fresh flowers over a plush woven wool rug." }
+      ],
+      nursery_kids: [
+        { id: "hero_console", num: "1", title: "Hero — Nursery Dresser / Console", room: "Luxury Nursery Vignette",
+          specifics: "Closer editorial crop centered on the framed art above a fluted light-oak nursery dresser (STRICTLY NO BOOKS anywhere). Style neatly with a woven bouclé/cotton keepsake basket, draped chunky knit blanket, soft colored cushion, and a low ceramic vase with fresh soft blooms clear of the frame." },
+        { id: "bedroom", num: "2", title: "Nursery Crib Wall", room: "Editorial Luxury Baby Nursery",
+          specifics: "Feature a designer curved wood crib dressed in organic cotton linen with a quilted accent throw and soft cushion echoing the Hero palette over a plush wool rug, flanked by two sculpted travertine/oak bedside tables topped with ceramic urns of lush fresh flowers." },
+        { id: "kitchen", num: "3", title: "Kids Playroom", room: "Designer Children's Playroom",
+          specifics: "Feature bespoke fluted oak toy cabinetry, a plush textured wool rug, woven storage baskets, a soft bouclé floor pouf, and curated wooden play pieces echoing the Hero palette." },
+        { id: "bathroom", num: "4", title: "Kids Bathroom", room: "Bright Designer Children's Bathroom",
+          specifics: "Feature honed stone vanity, warm brass taps, folded plush towels with a soft colored accent matching the Hero palette, natural oak step stool, and fresh blooms in a ceramic vase." },
+        { id: "office", num: "5", title: "Kids Study / Craft Desk", room: "Editorial Children's Study Nook",
+          specifics: "Include a stylish light-oak desk with a curved bouclé chair, open sketchbook/notepad and pen, fresh flowers in a ceramic vase, and an artisan ceramic mug over a textured rug." },
+        { id: "dining", num: "6", title: "Toddler Bedroom", room: "Luxury Editorial Toddler Bedroom",
+          specifics: "Include a curved bouclé toddler bed richly layered with textured accent pillows and a chunky knit throw echoing the Hero palette, sculpted oak nightstand with fresh flowers, and plush woven rug." },
+        { id: "entryway", num: "7", title: "Kids Reading Corner", room: "Cozy Designer Kids Corner",
+          specifics: "Feature a plush bouclé lounge chair with a color-matched pillow and draped knit throw, round textured wool rug, and soft woven basket." },
+        { id: "living", num: "8", title: "Family Living Room", room: "Bright Editorial Family Living Room",
+          specifics: "Feature a deep bouclé family sofa layered with rich accent pillows and a chunky knit throw echoing the Hero palette, sculptural travertine coffee table, fresh flowers in a ceramic urn, and plush woven rug." }
+      ]
+    };
+
+    const REF_SLOTS = [
+      { key: "flatlay", label: "#9 Flatlay Poster Ref" },
+      { key: "printer", label: "#10 Art in Printer Ref" },
+      { key: "side_perspective", label: "#12 Side Perspective Ref" },
+      { key: "rolled_open", label: "#13 Model Rolling Ref" }
+    ];
+
+    const VIBES = {
+      floral: { style: "Architectural Digest 2027 Quiet Luxury magazine editorial", trend: "honed travertine, fluted white oak, curved bouclé upholstery, chunky knit & cashmere throws, brushed champagne brass", props: "sculpted marble urns overflowing with lush white peonies & garden roses, white orchids, colored fluted glass/ceramic accents" },
+      botanical: { style: "Architectural Digest 2027 Quiet Luxury botanical editorial", trend: "honed travertine & fluted oak, curved bouclé & linen upholstery, brushed champagne brass", props: "sculpted marble urns with lush white blooms and trailing eucalyptus, artisan stoneware" },
+      coastal: { style: "Architectural Digest 2027 Coastal Quiet Luxury editorial", trend: "bleached European oak, honed travertine, linen & bouclé upholstery, matte stoneware", props: "sculpted stoneware urns filled with lush white hydrangeas and coastal greenery" },
+      abstract: { style: "Architectural Digest contemporary gallery luxury", trend: "honed travertine, sculptural bouclé furniture, warm oak, brushed brass accents", props: "architectural stone vessels with lush blooms and sculpted ceramic objects" },
+      vintage: { style: "Architectural Digest European heritage Quiet Luxury", trend: "warm oak, honed travertine, heirloom linen, soft bouclé, subtle antique brass", props: "classic marble urns overflowing with romantic garden roses and loose greenery" },
+      nursery: { style: "Architectural Digest luxury nursery editorial", trend: "fluted white oak, soft bouclé, organic cotton, chunky knit blankets, plush woven wool", props: "artisan ceramic vases with lush soft fresh blooms and woven baskets", pack: "nursery_kids" }
+    };
+
+    const state = {
+      artFiles: [null, null, null],
+      heroFile: null,
+      refVault: safeLoadVault(),
+      rooms: JSON.parse(JSON.stringify(ROOM_PACKS.luxury_home)),
+      shotExtras: {}
+    };
+
+    function rgbToHsl(r, g, b) {
+      r /= 255; g /= 255; b /= 255;
+      const max = Math.max(r, g, b), min = Math.min(r, g, b), l = (max + min) / 2;
+      if (max === min) return [0, 0, l * 100];
+      const d = max - min, s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+      let h = max === r ? (g - b) / d + (g < b ? 6 : 0) : max === g ? (b - r) / d + 2 : (r - g) / d + 4;
+      return [h * 60, s * 100, l * 100];
+    }
+
+    function nameColor(r, g, b) {
+      const [h, s, l] = rgbToHsl(r, g, b);
+      if (l > 90 && s < 15) return "crisp ivory";
+      if (l < 16 && s < 25) return "deep charcoal";
+      if (s < 14) return l > 70 ? "warm alabaster" : "soft stone grey";
+      if (h < 14 || h >= 342) return (s > 48 && l < 62 && l > 35) ? "protea rose pink" : l > 70 ? "soft blush" : "warm coral";
+      if (h < 35) return l > 70 ? "warm peach sand" : "warm terracotta";
+      if (h < 58) return l > 72 ? "warm linen beige" : "muted champagne gold";
+      if (h < 95) return l > 62 ? "celadon sage" : "olive green";
+      if (h < 158) return l > 58 ? "eucalyptus sage" : "forest green";
+      if (h < 195) return l > 62 ? "seafoam aqua" : "ocean teal";
+      if (h < 245) return (s > 52 && l > 35 && l < 65) ? "cobalt blue" : l > 68 ? "misty sky blue" : "coastal navy";
+      return l > 66 ? "soft lavender" : "peony rose";
+    }
+
+    function evaluateArt() {
+      const arts = state.artFiles.filter(Boolean);
+      if (!arts.length) {
+        document.getElementById("swatchSection").classList.add("hidden");
+        document.getElementById("detectedRatioTag").textContent = "Auto-detect";
+        return;
+      }
+      const a0 = arts[0];
+      if (a0.origW && a0.origH) {
+        const r = a0.origW / a0.origH, sel = document.getElementById("artRatioSelect"), tag = document.getElementById("detectedRatioTag");
+        sel.value = r <= 0.72 ? "vertical_2_3" : r <= 0.88 ? "vertical_4_5" : r >= 1.15 ? "horizontal_3_2" : "square_1_1";
+        tag.textContent = `Detected (${a0.origW}×${a0.origH})`;
+      }
+      const buckets = new Map(); let totalL = 0, totalW = 0, px = 0;
+      Promise.all(arts.map(a => new Promise(res => {
+        const img = new Image();
+        img.onload = () => {
+          const c = document.createElement("canvas"); c.width = 48; c.height = 48;
+          const ctx = c.getContext("2d"); ctx.drawImage(img, 0, 0, 48, 48);
+          const d = ctx.getImageData(0, 0, 48, 48).data;
+          for (let i = 0; i < d.length; i += 4) {
+            const [h, s, l] = rgbToHsl(d[i], d[i+1], d[i+2]);
+            totalL += l; if (h < 65 || h > 320) totalW++; px++;
+            if (l > 95 && s < 8) continue;
+            const k = nameColor(d[i], d[i+1], d[i+2]);
+            const cur = buckets.get(k) || { n: 0, r: 0, g: 0, b: 0 };
+            cur.n++; cur.r += d[i]; cur.g += d[i+1]; cur.b += d[i+2]; buckets.set(k, cur);
+          }
+          res();
+        };
+        img.src = a.dataUrl;
+      }))).then(() => {
+        const top = [...buckets.entries()].sort((a, b) => b[1].n - a[1].n).slice(0, 5)
+          .map(([k, v]) => ({ k, rgb: `rgb(${Math.round(v.r/v.n)},${Math.round(v.g/v.n)},${Math.round(v.b/v.n)})` }));
+        document.getElementById("toneLabel").textContent = (totalL/px > 60 ? "Light" : "Rich") + " • " + (totalW/px > 0.48 ? "Warm" : "Cool");
+        document.getElementById("swatchRow").innerHTML = top.map(t => `<span class="inline-flex items-center gap-1 text-[11px] bg-white border rounded-full px-2 py-0.5"><span class="w-2.5 h-2.5 rounded-full" style="background:${t.rgb}"></span>${t.k}</span>`).join("");
+        document.getElementById("swatchSection").classList.remove("hidden");
+        if (top.length) document.getElementById("evalColors").value = top.map(t => t.k).join(", ");
+        renderShots();
+      });
+    }
+
+    function readFile(file, max = 900) {
+      return new Promise((res, rej) => {
+        const rd = new FileReader();
+        rd.onload = e => {
+          const img = new Image();
+          img.onload = () => {
+            const origW = img.naturalWidth, origH = img.naturalHeight;
+            let w = origW, h = origH;
+            if (w > max || h > max) { if (w > h) { h = Math.round(h*max/w); w = max; } else { w = Math.round(w*max/h); h = max; } }
+            const c = document.createElement("canvas"); c.width = w; c.height = h;
+            c.getContext("2d").drawImage(img, 0, 0, w, h);
+            res({ name: file.name, origW, origH, dataUrl: c.toDataURL("image/jpeg", 0.86) });
+          };
+          img.onerror = rej; img.src = e.target.result;
+        };
+        rd.onerror = rej; rd.readAsDataURL(file);
+      });
+    }
+
+    function buildShots() {
+      const ev = {
+        colors: document.getElementById("evalColors").value.trim(),
+        style: document.getElementById("evalStyle").value.trim(),
+        trend: document.getElementById("evalTrend").value.trim(),
+        frame: document.getElementById("evalFrame").value.trim(),
+        props: document.getElementById("evalProps").value.trim(),
+        ratio: RATIO_DESC[document.getElementById("artRatioSelect").value]
+      };
+      const cnt = state.artFiles.filter(Boolean).length;
+      const hasHero = !!state.heroFile;
+      const artPhrase = cnt <= 1 ? "the attached image to be placed" : cnt === 2 ? "the attached image to be placed (both attached artworks side-by-side as a matching diptych)" : "the attached image to be placed (all three attached artworks side-by-side as a matching triptych set of 3)";
+      const unitLabel = cnt === 3 ? "set of 3 framed prints" : cnt === 2 ? "set of 2 framed prints" : "single framed print";
+      const heroNote = hasHero ? "the uploaded Hero image" : "the prior Hero image";
+      const attachFollowHint = hasHero ? "Attach Art + Uploaded Hero" : "Upload Hero in Box #2, then attach Art + Hero";
+      const lock = `Keep pure crisp white walls only—NO wall lights or sconces on the walls, NO windows, NO passages, NO skylights, and NO side views of other rooms. NO mat in frame. Preserve ${ev.ratio} (max 24×36", realistic subtle inner-frame shadows, zero objects overlapping the frame). Bright, sunlit, airy magazine photography with minimal soft shadows. 1:1 square ratio.`;
+
+      const shots = state.rooms.map((r, i) => i === 0 ? {
+        id: r.id, num: r.num, title: r.title, badge: "STEP 1: HERO FIRST",
+        hint: `Attach ${cnt || 1} art file(s) only`,
+        prompt: `Create a stunning, ultra-luxurious ${ev.style} Hero Image in 1:1 ratio for ${artPhrase} (${unitLabel}).
+- Use "${artPhrase}" exactly—never alter or describe the art.
+- Preserve ${ev.ratio} (max 24×36 inches), ~75–80% focal presence in ${ev.frame}, 100% lifelike and blended into the room with realistic inner-frame shadows and NO MAT in the frame.
+- ${r.specifics}
+- Materials & palette: ${ev.trend}; subtly echo these artwork colors in the pillow/accent vessels: ${ev.colors}. Use ${ev.props}.
+- Pure crisp white walls only. NO wall lights/sconces, NO windows, passages, skylights, or side views of other rooms. Bright sunlit luxury magazine quality, minimal gentle shadows. 1:1 ratio.`
+      } : {
+        id: r.id, num: r.num, title: r.title, badge: hasHero ? "Hero-Locked WOW" : "Waiting for Hero",
+        hint: attachFollowHint,
+        prompt: `Create a stunning, ultra-luxurious ${ev.style} ${r.room} featuring ${artPhrase} (${unitLabel}) in ${ev.frame}. Match the rich magazine luxury level, bright sunlit glow, and subtle color accents (${ev.colors}) of ${heroNote}—using fresh, room-authentic furniture and decor (DO NOT repeat the Hero's console table or wall lights/sconces):
+- ${r.specifics}
+- Materials & textures: ${ev.trend}.
+- ${lock}`
+      });
+
+      shots.push(
+        { id: "flatlay", num: "9", title: "Flatlay of Art on Table as Poster", badge: "Saved Ref", refKey: "flatlay", hint: "Attach Art + Hero + Flatlay Ref",
+          prompt: `Using the attached Flatlay reference image for layout and ${heroNote} for ultra-luxurious aesthetic, create a bright magazine-quality 1:1 flatlay on a honed travertine/light wood table showing ${artPhrase} as unframed matte poster(s) (no mat, ${ev.ratio}). Style edges lightly with subtle props echoing ${ev.colors}. Soft bright daylight, minimal shadows, 1:1 ratio.` },
+        { id: "printer", num: "10", title: "Image of Art in Printer", badge: "Saved Ref", refKey: "printer", hint: "Attach Art + Hero + Printer Ref",
+          prompt: `Using the attached Printer reference image for exact printer perspective and ${heroNote} for bright clean luxury aesthetic, show ${artPhrase} emerging freshly printed on fine-art matte paper from the printer (preserving exact proportions). Bright studio daylight, minimal shadows, 1:1 ratio.` },
+        { id: "frame_oak", num: "11a", title: "Frame 1/3 — Light Oak Frame", badge: "Base Scene", hint: attachFollowHint,
+          prompt: `Create an ultra-luxurious, bright magazine vignette matching ${heroNote}'s aesthetic (without repeating identical Hero decor) showing ${artPhrase} (${unitLabel}) in a **LIGHT NATURAL OAK** frame above a sleek travertine ledge with sculpted marble urns of lush white florals clear of the frame.\n${lock}` },
+        { id: "frame_white", num: "11b", title: "Frame 2/3 — White Frame (Exact Same)", badge: "Edit 11a", hint: "Attach Image 11a",
+          prompt: `Using Shot 11a (Light Oak) as the exact locked base, keep the ENTIRE room, lighting, furniture, flowers, white walls, and ${artPhrase} 100% identical. ONLY change the frame to **MATTE WHITE**. No mat. 1:1 ratio.` },
+        { id: "frame_black", num: "11c", title: "Frame 3/3 — Black Frame (Exact Same)", badge: "Edit 11a", hint: "Attach Image 11a",
+          prompt: `Using Shot 11a (Light Oak) as the exact locked base, keep the ENTIRE room, lighting, furniture, flowers, white walls, and ${artPhrase} 100% identical. ONLY change the frame to **MATTE BLACK**. No mat. 1:1 ratio.` },
+        { id: "side_perspective", num: "12", title: "Side Perspective Image", badge: "Saved Ref", refKey: "side_perspective", hint: "Attach Art + Hero + Side Ref",
+          prompt: `Using the attached Side Perspective reference image for exact angled viewpoint and ${heroNote} for luxury aesthetic, show ${artPhrase} framed in ${ev.frame} (no mat, ${ev.ratio}) on a pure white wall with NO wall lights. Bright airy lighting, subtle inner-frame shadow, no windows/passages, 1:1 ratio.` },
+        { id: "rolled_open", num: "13", title: "Art Rolled Open by Model", badge: "Saved Ref", refKey: "rolled_open", hint: "Attach Art + Hero + Rolling Ref",
+          prompt: `Using the attached Model Rolling reference image for exact hand pose and ${heroNote} for bright luxury aesthetic, show a model gently unrolling ${artPhrase} on matte fine-art paper (preserving exact proportions) in neutral luxury knitwear over a bright soft backdrop. Minimal shadows, 1:1 ratio.` },
+        { id: "inboxing", num: "14", title: "Inboxing / Gifting Image", badge: hasHero ? "Hero-Locked WOW" : "Waiting for Hero", hint: attachFollowHint,
+          prompt: `Create a bright, ultra-luxurious magazine gifting & unboxing scene on honed travertine/linen matching ${heroNote}'s aesthetic and palette (${ev.colors}), featuring ${artPhrase} (${ev.ratio}) inside an open bespoke luxury gift folio with crisp pleated tissue paper, satin ribbon, and fresh blooms. Soft airy daylight, minimal shadows, 1:1 ratio.` }
+      );
+      return shots;
+    }
+
+    function renderArtSlots() {
+      document.getElementById("artSlots").innerHTML = state.artFiles.map((a, i) => `
+        <div class="border-2 border-dashed border-stone-300 rounded-xl p-1.5 flex flex-col items-center justify-center min-h-[96px] relative bg-stone-50">
+          ${a ? `<img src="${a.dataUrl}" class="w-full h-20 object-contain rounded" /><button data-rm-art="${i}" class="absolute top-1 right-1 bg-white text-rose-600 rounded-full w-5 h-5 text-xs border">&times;</button>`
+              : `<label class="cursor-pointer text-center w-full py-2.5"><div class="text-lg text-stone-400">+</div><div class="text-[11px] text-stone-600">Piece ${i+1}</div><input type="file" accept="image/*" class="hidden" data-up-art="${i}" /></label>`}
+        </div>`).join("");
+      document.getElementById("pieceCountBadge").textContent = `${state.artFiles.filter(Boolean).length} / 3`;
+    }
+
+    function renderHeroSlot() {
+      const slot = document.getElementById("heroSlot"), badge = document.getElementById("heroBadge");
+      if (state.heroFile) {
+        badge.className = "text-[10px] px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-semibold";
+        badge.textContent = "✓ Hero Uploaded";
+        slot.innerHTML = `<div class="relative flex items-center gap-3 bg-white border border-amber-200 rounded-lg p-2">
+          <img src="${state.heroFile.dataUrl}" class="w-16 h-16 object-cover rounded border" />
+          <div class="text-xs text-stone-700"><strong>Approved Hero Ready</strong><div class="text-[11px] text-stone-500">Attach Art + this Hero in AI Studio for Shots #2–#14.</div></div>
+          <button id="rmHeroBtn" class="absolute top-1 right-1 bg-white text-rose-600 rounded-full w-5 h-5 text-xs border">&times;</button>
+        </div>`;
+      } else {
+        badge.className = "text-[10px] px-2 py-0.5 rounded-full bg-stone-200 text-stone-700";
+        badge.textContent = "Waiting";
+        slot.innerHTML = `<label class="cursor-pointer border-2 border-dashed border-amber-300 bg-white rounded-lg py-3 flex items-center justify-center text-xs font-medium text-amber-900 hover:bg-amber-50">
+          + Upload Approved Hero Image (after Shot #1)<input type="file" accept="image/*" class="hidden" id="upHeroInput" />
+        </label>`;
+      }
+    }
+
+    function renderRefVault() {
+      document.getElementById("refVaultGrid").innerHTML = REF_SLOTS.map(s => {
+        const v = state.refVault[s.key];
+        return `<div class="border border-stone-200 rounded-xl p-2.5 bg-stone-50 space-y-1.5">
+          <div class="text-xs font-semibold text-stone-800">${s.label}</div>
+          ${v ? `<div class="relative"><img src="${v.dataUrl}" class="w-full h-20 object-cover rounded border" /><button data-rm-ref="${s.key}" class="absolute top-1 right-1 bg-white text-rose-600 rounded-full w-5 h-5 text-xs border">&times;</button></div>`
+              : `<label class="cursor-pointer border-2 border-dashed border-stone-300 rounded-lg h-20 flex items-center justify-center text-xs text-stone-500 hover:bg-white">+ Upload<input type="file" accept="image/*" class="hidden" data-up-ref="${s.key}" /></label>`}
+        </div>`;
+      }).join("");
+    }
+
+    function renderRoomEditor() {
+      document.getElementById("roomEditorGrid").innerHTML = state.rooms.map((r, i) => `
+        <div class="border border-stone-200 rounded-lg p-2.5 bg-stone-50 space-y-1.5">
+          <div class="flex items-center gap-2"><span class="text-xs font-bold">#${r.num}</span><input type="text" value="${r.room.replace(/"/g,'&quot;')}" data-rname="${i}" class="flex-1 text-xs border rounded px-2 py-1 bg-white" /></div>
+          <textarea rows="2" data-rspec="${i}" class="w-full text-xs border rounded px-2 py-1 bg-white">${r.specifics}</textarea>
+        </div>`).join("");
+    }
+
+    function renderShots() {
+      const shots = buildShots();
+      document.getElementById("progressCounter").textContent = `${shots.filter(s => state.shotExtras[s.id]?.done).length} / ${shots.length} Done`;
+      document.getElementById("shotsGrid").innerHTML = shots.map(s => {
+        const ex = state.shotExtras[s.id] || {}, ref = s.refKey ? state.refVault[s.refKey] : null;
+        return `<div class="card p-3.5 flex flex-col gap-2.5 ${ex.done ? "shot-done" : ""}">
+          <div class="flex items-start justify-between gap-2">
+            <div>
+              <div class="flex items-center gap-1.5"><span class="text-xs font-bold px-2 py-0.5 rounded bg-stone-900 text-white">#${s.num}</span><h3 class="font-semibold text-sm">${s.title}</h3></div>
+              <div class="text-[11px] text-stone-500 mt-0.5">${s.badge} • ${s.hint}</div>
+            </div>
+            <div class="flex gap-1.5 shrink-0">
+              <button data-done="${s.id}" class="text-xs border rounded-lg px-2 py-1 ${ex.done ? "bg-emerald-600 text-white border-emerald-600" : "border-stone-300"}">${ex.done ? "✓" : "Done"}</button>
+              <button data-copy="${s.id}" class="bg-stone-900 text-white text-xs rounded-lg px-2.5 py-1">📋 Copy</button>
+            </div>
+          </div>
+          ${ref ? `<div class="flex items-center justify-between bg-emerald-50 border border-emerald-200 rounded px-2 py-1"><div class="flex items-center gap-2"><img src="${ref.dataUrl}" class="w-8 h-8 rounded object-cover" /><span class="text-[11px] text-emerald-800">Saved Ref Ready</span></div><a href="${ref.dataUrl}" download="ref_${s.refKey}.jpg" class="text-[11px] underline text-emerald-900">Download</a></div>` : ""}
+          <textarea rows="5" data-pbox="${s.id}" class="w-full text-xs font-mono border border-stone-200 rounded-lg p-2 bg-stone-50">${ex.customPrompt || s.prompt}</textarea>
+          <div class="flex flex-wrap gap-1.5 items-center pt-1 border-t border-stone-100">
+            <label class="cursor-pointer text-[11px] border rounded px-2 py-1">${ex.hasExtraRef ? "✓ Extra Ref" : "+ Extra Ref"}<input type="file" accept="image/*" class="hidden" data-sref="${s.id}" /></label>
+            <input type="text" placeholder="Request change..." value="${(ex.changeNote || "").replace(/"/g,'&quot;')}" data-schg="${s.id}" class="flex-1 min-w-[140px] text-xs border rounded px-2 py-1" />
+            <button data-apply="${s.id}" class="text-xs bg-stone-800 text-white rounded px-2.5 py-1">Update</button>
+          </div>
+        </div>`;
+      }).join("");
+    }
+
+    document.addEventListener("change", async e => {
+      if (e.target.dataset.upArt !== undefined && e.target.files[0]) {
+        state.artFiles[+e.target.dataset.upArt] = await readFile(e.target.files[0], 900);
+        renderArtSlots(); evaluateArt();
+      }
+      if (e.target.id === "upHeroInput" && e.target.files[0]) {
+        state.heroFile = await readFile(e.target.files[0], 900);
+        renderHeroSlot(); renderShots();
+      }
+      if (e.target.dataset.upRef && e.target.files[0]) {
+        state.refVault[e.target.dataset.upRef] = await readFile(e.target.files[0], 768);
+        safeSaveVault(state.refVault);
+        renderRefVault(); renderShots();
+      }
+      if (e.target.dataset.sref && e.target.files[0]) {
+        state.shotExtras[e.target.dataset.sref] = { ...(state.shotExtras[e.target.dataset.sref]||{}), hasExtraRef: true };
+        renderShots();
+      }
+      if (e.target.id === "artRatioSelect") renderShots();
+      if (e.target.id === "roomPack" && ROOM_PACKS[e.target.value]) {
+        state.rooms = JSON.parse(JSON.stringify(ROOM_PACKS[e.target.value]));
+        renderRoomEditor(); renderShots();
+      }
+    });
+
+    document.addEventListener("input", e => {
+      if (e.target.dataset.rname !== undefined) { state.rooms[+e.target.dataset.rname].room = e.target.value; document.getElementById("roomPack").value = "custom"; }
+      if (e.target.dataset.rspec !== undefined) { state.rooms[+e.target.dataset.rspec].specifics = e.target.value; document.getElementById("roomPack").value = "custom"; }
+      if (e.target.dataset.schg) state.shotExtras[e.target.dataset.schg] = { ...(state.shotExtras[e.target.dataset.schg]||{}), changeNote: e.target.value };
+      if (e.target.dataset.pbox) state.shotExtras[e.target.dataset.pbox] = { ...(state.shotExtras[e.target.dataset.pbox]||{}), customPrompt: e.target.value };
+    });
+
+    document.addEventListener("click", async e => {
+      if (e.target.dataset.rmArt !== undefined) { state.artFiles[+e.target.dataset.rmArt] = null; renderArtSlots(); evaluateArt(); }
+      if (e.target.id === "rmHeroBtn") { state.heroFile = null; renderHeroSlot(); renderShots(); }
+      if (e.target.dataset.rmRef) { delete state.refVault[e.target.dataset.rmRef]; safeSaveVault(state.refVault); renderRefVault(); renderShots(); }
+      if (e.target.dataset.vibe) {
+        const v = VIBES[e.target.dataset.vibe];
+        document.getElementById("evalStyle").value = v.style;
+        document.getElementById("evalTrend").value = v.trend;
+        document.getElementById("evalProps").value = v.props;
+        if (v.pack) { document.getElementById("roomPack").value = v.pack; state.rooms = JSON.parse(JSON.stringify(ROOM_PACKS[v.pack])); renderRoomEditor(); }
+        renderShots();
+      }
+      if (e.target.dataset.copy) {
+        await navigator.clipboard.writeText(document.querySelector(`[data-pbox="${e.target.dataset.copy}"]`).value);
+        e.target.textContent = "✓ Copied"; setTimeout(() => e.target.textContent = "📋 Copy", 1200);
+      }
+      if (e.target.dataset.done) {
+        const id = e.target.dataset.done;
+        state.shotExtras[id] = { ...(state.shotExtras[id]||{}), done: !state.shotExtras[id]?.done };
+        renderShots();
+      }
+      if (e.target.dataset.apply) {
+        const id = e.target.dataset.apply, base = buildShots().find(s => s.id === id).prompt;
+        const note = (state.shotExtras[id]?.changeNote || "").trim();
+        const refLine = state.shotExtras[id]?.hasExtraRef ? "\n- Use the newly attached extra reference image." : "";
+        state.shotExtras[id] = { ...(state.shotExtras[id]||{}), customPrompt: (note || refLine) ? `${base}\n\nREVISION:${note ? `\n- ${note}` : ""}${refLine}` : base };
+        renderShots();
+      }
+    });
+
+    document.getElementById("copyEvalHelperBtn").onclick = async () => {
+      await navigator.clipboard.writeText("Look at my attached wall art. Do NOT describe what is drawn in it. In 5 short lines give: 1) Best 4 decor colors 2) Interior style 3) 2027 textures 4) Best frame finish 5) Best fresh flowers.");
+      const b = document.getElementById("copyEvalHelperBtn"); b.textContent = "✓ Copied!"; setTimeout(() => b.textContent = "✨ Copy Free Gemini Evaluator", 1200);
+    };
+    document.getElementById("clearRefsBtn").onclick = () => { state.refVault = {}; try { localStorage.removeItem("igda_refVault"); } catch (e) {} renderRefVault(); renderShots(); };
+    document.getElementById("toggleRoomEditorBtn").onclick = () => document.getElementById("roomEditorGrid").classList.toggle("hidden");
+    document.getElementById("rebuildPromptsBtn").onclick = renderShots;
+    document.getElementById("resetListingBtn").onclick = () => { state.artFiles = [null,null,null]; state.heroFile = null; state.shotExtras = {}; document.getElementById("swatchSection").classList.add("hidden"); renderArtSlots(); renderHeroSlot(); renderShots(); };
+    document.getElementById("copyAllBtn").onclick = async () => {
+      const txt = [...document.querySelectorAll("[data-pbox]")].map(b => `=== #${b.dataset.pbox.toUpperCase()} ===\n${b.value}`).join("\n\n");
+      await navigator.clipboard.writeText(txt);
+      const b = document.getElementById("copyAllBtn"); b.textContent = "✓ All 16 Copied!"; setTimeout(() => b.textContent = "📋 Copy All 16", 1400);
+    };
+
+    renderArtSlots(); renderHeroSlot(); renderRefVault(); renderRoomEditor(); renderShots();
+  </script>
+</body>
+</html>
