@@ -1,0 +1,976 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>InfiniteGraceDesiArt — Free Nano Banana Studio</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { background-color: #faf9f6; color: #1f2937; font-family: ui-sans-serif, system-ui, -apple-system, sans-serif; }
+    .card { background: #ffffff; border: 1px solid #ece8e1; border-radius: 14px; box-shadow: 0 2px 10px rgba(0,0,0,0.03); }
+    .btn-dark { background: #1f2937; color: #ffffff; transition: all .15s; }
+    .btn-dark:hover { background: #111827; }
+    .btn-gold { background: #b08d57; color: #ffffff; transition: all .15s; }
+    .btn-gold:hover { background: #967543; }
+    .shot-done { opacity: 0.68; border-color: #bbf7d0; background: #f8fff9; }
+    textarea { resize: vertical; }
+  </style>
+</head>
+<body class="min-h-screen pb-16">
+
+  <!-- Top Navigation -->
+  <header class="bg-white border-b border-stone-200 sticky top-0 z-30">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex flex-wrap items-center justify-between gap-3">
+      <div>
+        <div class="flex items-center gap-2">
+          <span class="inline-block w-2.5 h-2.5 rounded-full bg-amber-600"></span>
+          <h1 class="text-lg font-semibold tracking-tight text-stone-900">InfiniteGraceDesiArt — Listing Studio</h1>
+          <span class="text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">100% Free • No API</span>
+        </div>
+        <p class="text-xs text-stone-500">Built for Google AI Studio (Nano Banana) &amp; Gemini AI • infinitegracedesiart.etsy.com</p>
+      </div>
+
+      <div class="flex flex-wrap items-center gap-2">
+        <select id="productCategory" class="text-xs sm:text-sm border border-stone-300 rounded-lg px-2.5 py-1.5 bg-white">
+          <option value="wall_art" selected>Product: Wall Art (1–3 Pieces)</option>
+          <option value="greeting_cards" disabled>Greeting Cards (Phase 2)</option>
+          <option value="calendars" disabled>Calendars (Phase 2)</option>
+          <option value="patterns" disabled>Seamless Patterns (Phase 2)</option>
+          <option value="png_clipart" disabled>PNG Clipart (Phase 2)</option>
+        </select>
+
+        <select id="roomPack" class="text-xs sm:text-sm border border-stone-300 rounded-lg px-2.5 py-1.5 bg-white">
+          <option value="luxury_home">Rooms: Luxury Home (8 Rooms)</option>
+          <option value="nursery_kids">Rooms: Nursery &amp; Kids Pack</option>
+          <option value="custom">Rooms: Custom Mix</option>
+        </select>
+
+        <a href="https://aistudio.google.com/" target="_blank" rel="noopener"
+          class="btn-gold text-xs font-medium rounded-lg px-3 py-1.5 inline-flex items-center gap-1">
+          🍌 Open AI Studio
+        </a>
+        <a href="https://gemini.google.com/" target="_blank" rel="noopener"
+          class="text-xs font-medium border border-stone-300 rounded-lg px-3 py-1.5 hover:bg-stone-50">
+          ✨ Open Gemini
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 mt-6 space-y-6">
+
+    <!-- Quick Nano Banana Workflow Banner -->
+    <div class="bg-amber-50/80 border border-amber-200 rounded-xl p-3.5 text-xs text-amber-950 flex flex-wrap items-center justify-between gap-3">
+      <div>
+        <strong>Nano Banana / AI Studio Tip:</strong> Set AI Studio Aspect Ratio to <strong>1:1</strong>.
+        Start with your 1–3 artwork image(s) + <strong>Prompt #1 (Hero)</strong>.
+        Keep Shots #2–#8 in that same chat (or attach your generated Hero image so the style stays 100% locked).
+      </div>
+      <div class="flex items-center gap-2">
+        <span id="progressCounter" class="font-semibold bg-white px-2.5 py-1 rounded-md border border-amber-200">0 / 16 Done</span>
+        <button id="resetListingBtn" class="text-xs underline text-amber-900 hover:text-black">New Listing Reset</button>
+      </div>
+    </div>
+
+    <!-- Step 1 & 2: Upload Art + Automatic Browser Evaluator -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+      <!-- Left: Art Uploads (Up to 3) -->
+      <section class="card p-5 lg:col-span-5 space-y-4">
+        <div class="flex items-center justify-between">
+          <h2 class="font-semibold text-stone-900">1. Upload Wall Art (1 to 3 Pieces)</h2>
+          <span id="pieceCountBadge" class="text-xs px-2 py-0.5 rounded-full bg-stone-100 text-stone-700">0 / 3 uploaded</span>
+        </div>
+        <p class="text-xs text-stone-500">
+          Colors and brightness are scanned automatically right in your browser. Prompts always insert
+          <code class="bg-stone-100 px-1 rounded">"the attached image to be placed"</code> and never describe the art.
+        </p>
+
+        <div class="grid grid-cols-3 gap-3" id="artSlots"></div>
+
+        <!-- Detected Swatches -->
+        <div id="swatchSection" class="hidden bg-stone-50 border border-stone-200 rounded-lg p-3 space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-semibold text-stone-800">Auto-Detected Art Palette:</span>
+            <span id="toneLabel" class="text-[11px] font-medium text-amber-700"></span>
+          </div>
+          <div id="swatchRow" class="flex flex-wrap gap-2"></div>
+        </div>
+
+        <!-- Master Rules Summary -->
+        <div class="bg-stone-50 border border-stone-200 rounded-lg p-3 text-xs text-stone-600 space-y-1">
+          <div class="font-semibold text-stone-800">Locked Rules (Automatically Inside Prompts):</div>
+          <ul class="list-disc pl-4 space-y-0.5">
+            <li>Ratio: <strong>1:1</strong> | Max size: <strong>24x36"</strong> | Hero art: <strong>~80%</strong></li>
+            <li>Walls: <strong>Pure White</strong> | Light &amp; airy, minimal shadows</li>
+            <li>No windows, passages, skylights, or side views of other rooms</li>
+            <li>No mat inside frame; subtle realistic inner-frame shadows</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- Right: Art Evaluation & Styling DNA -->
+      <section class="card p-5 lg:col-span-7 space-y-4">
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <h2 class="font-semibold text-stone-900">2. Evaluated Colors, Art Type &amp; 2027 Interior Match</h2>
+            <p class="text-xs text-stone-500">Auto-filled from your uploaded art. Tap a vibe tag if it's Coastal, Nursery, Moody, etc.</p>
+          </div>
+          <button id="copyEvalHelperBtn" class="text-xs border border-stone-300 rounded-lg px-3 py-1.5 hover:bg-stone-50" title="Optional: Copy a quick question for free Gemini AI to suggest styling tags">
+            ✨ Copy Free Gemini Evaluator
+          </button>
+        </div>
+
+        <!-- 1-Click Art Category / Vibe Selector -->
+        <div>
+          <label class="block text-xs font-medium text-stone-600 mb-1.5">Art Subject / Room Fit (1-Click Auto-Tailor):</label>
+          <div class="flex flex-wrap gap-1.5" id="vibeTags">
+            <button data-vibe="botanical" class="vibe-btn text-xs px-2.5 py-1 rounded-full border border-stone-300 bg-white hover:bg-stone-100">🌿 Botanical / Nature</button>
+            <button data-vibe="floral" class="vibe-btn text-xs px-2.5 py-1 rounded-full border border-stone-300 bg-white hover:bg-stone-100">🌸 Florals</button>
+            <button data-vibe="coastal" class="vibe-btn text-xs px-2.5 py-1 rounded-full border border-stone-300 bg-white hover:bg-stone-100">🌊 Coastal / Ocean</button>
+            <button data-vibe="abstract" class="vibe-btn text-xs px-2.5 py-1 rounded-full border border-stone-300 bg-white hover:bg-stone-100">🎨 Modern Abstract</button>
+            <button data-vibe="vintage" class="vibe-btn text-xs px-2.5 py-1 rounded-full border border-stone-300 bg-white hover:bg-stone-100">🏛️ Vintage / Classical</button>
+            <button data-vibe="moody" class="vibe-btn text-xs px-2.5 py-1 rounded-full border border-stone-300 bg-white hover:bg-stone-100">🖤 Moody / Contrast</button>
+            <button data-vibe="nursery" class="vibe-btn text-xs px-2.5 py-1 rounded-full border border-amber-300 bg-amber-50 text-amber-900 hover:bg-amber-100">🧸 Kids / Nursery (Switches Rooms)</button>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+          <div>
+            <label class="block text-xs font-medium text-stone-600 mb-1">Evaluated Colors (For Room Decor &amp; Textiles)</label>
+            <input id="evalColors" type="text" class="w-full border border-stone-300 rounded-lg px-3 py-1.5 text-sm"
+              value="warm ivory, soft sage green, muted champagne gold, warm linen beige" />
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-stone-600 mb-1">Art Aesthetic / Interior Vibe</label>
+            <input id="evalStyle" type="text" class="w-full border border-stone-300 rounded-lg px-3 py-1.5 text-sm"
+              value="serene organic modern luxury" />
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-stone-600 mb-1">2027 Decor Trend Direction</label>
+            <input id="evalTrend" type="text" class="w-full border border-stone-300 rounded-lg px-3 py-1.5 text-sm"
+              value="2027 Warm Quiet Luxury with tactile travertine, bouclé, fluted oak, and unlacquered brushed brass" />
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-stone-600 mb-1">Suggested Hero Frame Finish</label>
+            <input id="evalFrame" type="text" class="w-full border border-stone-300 rounded-lg px-3 py-1.5 text-sm"
+              value="slim light natural oak or brushed champagne gold" />
+          </div>
+          <div class="sm:col-span-2">
+            <label class="block text-xs font-medium text-stone-600 mb-1">Complementary Florals &amp; Luxury Props</label>
+            <input id="evalProps" type="text" class="w-full border border-stone-300 rounded-lg px-3 py-1.5 text-sm"
+              value="fresh white garden roses and eucalyptus in a sculptural ceramic vase, travertine tray, soft linen textures" />
+          </div>
+        </div>
+
+        <div class="flex justify-end">
+          <button id="rebuildPromptsBtn" class="btn-dark text-xs font-medium px-4 py-2 rounded-lg">
+            🔄 Refresh All 16 Prompts
+          </button>
+        </div>
+      </section>
+    </div>
+
+    <!-- Step 3: Persistent Reference Images Vault -->
+    <section class="card p-5 space-y-3">
+      <div class="flex flex-wrap items-center justify-between gap-2">
+        <div>
+          <h2 class="font-semibold text-stone-900">3. Saved Reference Images Vault (Upload Once — Saved Forever in Browser)</h2>
+          <p class="text-xs text-stone-500">Your recurring reference photos for Shots #9, #10, #12, and #13 stay saved across every listing.</p>
+        </div>
+        <button id="clearRefsBtn" class="text-xs text-rose-600 hover:underline">Clear Saved References</button>
+      </div>
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-4" id="refVaultGrid"></div>
+    </section>
+
+    <!-- Step 4: Room Customization Drawer -->
+    <section class="card p-5 space-y-3">
+      <div class="flex items-center justify-between">
+        <div>
+          <h2 class="font-semibold text-stone-900">4. Room Types &amp; Specific Rules (Shots #1–#8)</h2>
+          <p class="text-xs text-stone-500">Swap to Nursery/Kids from the top dropdown, or customize any individual room below.</p>
+        </div>
+        <button id="toggleRoomEditorBtn" class="text-xs border border-stone-300 rounded-lg px-3 py-1.5 hover:bg-stone-50">
+          Edit Room List
+        </button>
+      </div>
+      <div id="roomEditorGrid" class="hidden grid grid-cols-1 md:grid-cols-2 gap-3 pt-2"></div>
+    </section>
+
+    <!-- Step 5: All 16 Ready-to-Copy Prompts -->
+    <section class="space-y-4">
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h2 class="text-lg font-semibold text-stone-900">5. Your 16 Ready-to-Paste Prompts (Copy Into AI Studio / Gemini)</h2>
+          <p class="text-xs text-stone-500">
+            Shot #1 is your full Master Hero prompt. Shots #2–#8 &amp; #14 are Hero-anchored follow-ups with locked rules.
+            Check off each shot as you finish it.
+          </p>
+        </div>
+        <button id="copyAllBtn" class="text-xs border border-stone-300 bg-white rounded-lg px-3.5 py-2 hover:bg-stone-50 font-medium">
+          📋 Copy All 16 Prompts
+        </button>
+      </div>
+
+      <div id="shotsGrid" class="grid grid-cols-1 lg:grid-cols-2 gap-5"></div>
+    </section>
+  </main>
+
+  <script>
+    // =========================================================================
+    // CONSTANTS & PRESETS
+    // =========================================================================
+    const INVARIANT_LOCK =
+      "STRICT REQUIREMENTS: Pure crisp white walls only. NO windows, NO passages, NO skylights, and NO side views of other rooms. NO mat inside the frame. Art must be max 24x36 inches per piece, 100% lifelike and naturally blended with realistic subtle inner-frame shadows. Light, airy, bright daylight interior magazine aesthetic with minimal soft shadows. 1:1 square aspect ratio.";
+
+    const ROOM_PACKS = {
+      luxury_home: [
+        { id: "hero_console", num: "1", title: "Hero — Art Over Console Table", room: "Console Table Vignette", isHero: true,
+          specifics: "Place the art centered above an ultra-luxurious sculptural console table. STRICTLY NO BOOKS anywhere in this image. Style console lightly with fresh flowers matching the palette, a sculptural vase or ceramic bowl, and natural stone/wood texture." },
+        { id: "bedroom", num: "2", title: "Bedroom", room: "Luxury Master Bedroom",
+          specifics: "Include two matching luxury bedside tables flanking an upholstered bed, with fresh flowers in elegant vases on both bedside tables. Crisp layered bedding and throws matching the Hero palette." },
+        { id: "kitchen", num: "3", title: "Kitchen", room: "Luxury Kitchen",
+          specifics: "Feature realistic upscale kitchen items (marble countertop, ceramic canisters, wooden cutting board, bowl of fresh fruit or herbs, subtle brass faucet) in a clean bright layout." },
+        { id: "bathroom", num: "4", title: "Bathroom", room: "Spa-Grade Luxury Bathroom",
+          specifics: "Feature serene spa bathroom styling (stone vanity or freestanding tub edge, folded plush neutral towels, artisan soap dispenser, fresh eucalyptus stem)." },
+        { id: "office", num: "5", title: "Home Office", room: "Luxury Home Office",
+          specifics: "Include a refined desk featuring a sleek laptop with a realistic work screen, a neat notepad and pen, fresh flowers in a vase, and a ceramic cup of cappuccino." },
+        { id: "dining", num: "6", title: "Dining Room", room: "Luxury Dining Room",
+          specifics: "Include a designer dining table with upholstered chairs and a curated floral centerpiece and ceramic tableware matching the Hero palette." },
+        { id: "entryway", num: "7", title: "Entryway", room: "Bright Luxury Entryway",
+          specifics: "Feature an inviting gallery-style foyer wall with a minimalist bench or slender console, woven runner rug, and fresh greenery." },
+        { id: "living", num: "8", title: "Living Room", room: "Ultra-Luxurious Living Room",
+          specifics: "Feature a plush designer sofa with coordinated throw pillows, soft textured throw blanket, sculpted coffee table with curated decor, fresh flowers, and a woven neutral rug." }
+      ],
+      nursery_kids: [
+        { id: "hero_console", num: "1", title: "Hero — Nursery Dresser / Console", room: "Luxury Nursery Dresser Vignette", isHero: true,
+          specifics: "Place the art centered above a refined light-wood nursery dresser/console. STRICTLY NO BOOKS anywhere in this image. Style lightly with fresh soft flowers, a woven basket, and a subtle keepsake ceramic piece." },
+        { id: "bedroom", num: "2", title: "Nursery Crib Wall", room: "Serene Luxury Baby Nursery",
+          specifics: "Feature a designer wooden crib flanked by two delicate accent tables with fresh flower arrangements, soft organic cotton bedding, and gentle airy warmth." },
+        { id: "kitchen", num: "3", title: "Kids Playroom", room: "Bright Organized Playroom",
+          specifics: "Feature upscale minimalist wooden toy storage, soft neutral play rug, woven storage baskets, and bright airy organization." },
+        { id: "bathroom", num: "4", title: "Kids Bathroom", room: "Bright Children's Bathroom",
+          specifics: "Feature clean white vanity, folded soft towels, natural wood step stool, and gentle spa-clean styling." },
+        { id: "office", num: "5", title: "Kids Study / Craft Desk", room: "Children's Study Nook",
+          specifics: "Include a clean desk featuring a realistic open sketchbook/notepad and pen, fresh flowers in a small vase, and a cozy ceramic mug." },
+        { id: "dining", num: "6", title: "Toddler Bedroom", room: "Luxury Toddler Bedroom",
+          specifics: "Include an upholstered toddler bed with coordinated pillows, cozy knit throw, and soft plush textures matching the Hero palette." },
+        { id: "entryway", num: "7", title: "Kids Reading Corner", room: "Cozy Kids Corner",
+          specifics: "Feature a low bouclé accent chair, textured round rug, soft floor cushion, and warm airy lighting." },
+        { id: "living", num: "8", title: "Family Living Room", room: "Bright Family Living Room",
+          specifics: "Feature a cozy luxury sofa with coordinated throw pillows, soft textured throw blanket, woven rug, and fresh flowers." }
+      ]
+    };
+
+    const REF_VAULT_SLOTS = [
+      { key: "flatlay", label: "Shot #9: Flatlay Poster Ref", desc: "Table poster flatlay ref" },
+      { key: "printer", label: "Shot #10: Art in Printer Ref", desc: "Printer output ref" },
+      { key: "side_perspective", label: "Shot #12: Side Perspective Ref", desc: "Angled frame depth ref" },
+      { key: "rolled_open", label: "Shot #13: Model Rolling Ref", desc: "Hands unrolling print ref" }
+    ];
+
+    const VIBE_CONFIGS = {
+      botanical: {
+        style: "organic modern botanical elegance",
+        trend: "2027 Biophilic Warm Minimalism with fluted wood, travertine, linen, and brushed brass",
+        props: "fresh eucalyptus or olive branches in a sculptural ceramic vase, natural stone tray, linen textures",
+        pack: "luxury_home"
+      },
+      floral: {
+        style: "romantic editorial floral luxury",
+        trend: "2027 Soft Editorial Luxury with bouclé, warm alabaster, travertine, and champagne brass",
+        props: "fresh garden roses and peonies in a refined ceramic or glass vase, soft linen and textured throws",
+        pack: "luxury_home"
+      },
+      coastal: {
+        style: "airy coastal organic luxury",
+        trend: "2027 Coastal Quiet Luxury with bleached oak, woven linen, travertine, and matte stoneware",
+        props: "fresh white hydrangeas in a textured ceramic vase, subtle natural stone tray, soft woven throws",
+        pack: "luxury_home"
+      },
+      abstract: {
+        style: "sculptural contemporary gallery luxury",
+        trend: "2027 Architectural Quiet Luxury with sculptural furniture, honed marble, and tactile bouclé",
+        props: "sculptural white stems in an architectural vase, travertine accents, minimalist ceramic vessels",
+        pack: "luxury_home"
+      },
+      vintage: {
+        style: "timeless European heritage luxury",
+        trend: "2027 Modern Heritage Luxury blending warm aged wood, marble, and soft heirloom textiles",
+        props: "loose garden floral arrangement in a classic ceramic urn, subtle brass accents, natural linen",
+        pack: "luxury_home"
+      },
+      moody: {
+        style: "warm high-contrast architectural luxury",
+        trend: "2027 Sculptural Warm Luxury with honed marble, warm wood tones, and soft alabaster contrast",
+        props: "fresh white calla lilies in a stoneware vase, travertine bowl, plush neutral throw",
+        pack: "luxury_home"
+      },
+      nursery: {
+        style: "serene luxury nursery editorial",
+        trend: "2027 Organic Nursery Luxury with natural birch/oak, soft bouclé, and breathable woven cotton",
+        props: "delicate fresh white blooms and baby's breath in a ceramic vase, soft knit blanket, woven basket",
+        pack: "nursery_kids"
+      }
+    };
+
+    const state = {
+      artFiles: [null, null, null],
+      detectedSwatches: [],
+      refVault: JSON.parse(localStorage.getItem("igda_refVault") || "{}"),
+      rooms: JSON.parse(JSON.stringify(ROOM_PACKS.luxury_home)),
+      shotExtras: {}, // { [shotId]: { refDataUrl, changeNote, customPrompt, done } }
+      activeVibe: null
+    };
+
+    // =========================================================================
+    // FREE BROWSER-BASED PIXEL COLOR & TONE EVALUATOR (NO API!)
+    // =========================================================================
+    function rgbToHsl(r, g, b) {
+      r /= 255; g /= 255; b /= 255;
+      const max = Math.max(r, g, b), min = Math.min(r, g, b);
+      let h = 0, s = 0, l = (max + min) / 2;
+      if (max !== min) {
+        const d = max - min;
+        s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+        switch (max) {
+          case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+          case g: h = (b - r) / d + 2; break;
+          case b: h = (r - g) / d + 4; break;
+        }
+        h /= 6;
+      }
+      return [h * 360, s * 100, l * 100];
+    }
+
+    function nameLuxuryColor(r, g, b) {
+      const [h, s, l] = rgbToHsl(r, g, b);
+      if (l > 90 && s < 15) return "crisp ivory cream";
+      if (l < 18 && s < 25) return "deep charcoal";
+      if (s < 14) {
+        if (l > 72) return "warm alabaster";
+        if (l > 45) return "soft stone grey";
+        return "slate grey";
+      }
+      if (h < 15 || h >= 345) {
+        if (l > 72) return "soft blush pink";
+        if (s > 45 && l > 42) return "warm coral terracotta";
+        return "muted rosewood";
+      }
+      if (h < 38) {
+        if (l > 70) return "warm peach sand";
+        if (l < 38) return "rich espresso brown";
+        return "warm terracotta";
+      }
+      if (h < 60) {
+        if (l > 72) return "warm linen beige";
+        if (s > 40) return "muted ochre gold";
+        return "warm taupe sand";
+      }
+      if (h < 95) {
+        return l > 65 ? "soft celadon sage" : "earthy olive green";
+      }
+      if (h < 160) {
+        if (l > 65) return "soft sage green";
+        return "botanical forest green";
+      }
+      if (h < 195) {
+        return l > 65 ? "seafoam aqua" : "deep ocean teal";
+      }
+      if (h < 245) {
+        if (l > 70) return "misty sky blue";
+        if (l < 35) return "deep coastal navy";
+        return "dusty slate blue";
+      }
+      if (h < 295) {
+        return l > 68 ? "soft lavender" : "muted plum";
+      }
+      return l > 68 ? "romantic peony pink" : "dusty mauve";
+    }
+
+    function evaluateUploadedArtworks() {
+      const arts = state.artFiles.filter(Boolean);
+      if (!arts.length) {
+        state.detectedSwatches = [];
+        document.getElementById("swatchSection").classList.add("hidden");
+        return;
+      }
+
+      const buckets = new Map();
+      let totalL = 0, totalWarm = 0, pixelCount = 0;
+
+      const promises = arts.map(art => new Promise(resolve => {
+        const img = new Image();
+        img.onload = () => {
+          const c = document.createElement("canvas");
+          c.width = 48; c.height = 48;
+          const ctx = c.getContext("2d");
+          ctx.drawImage(img, 0, 0, 48, 48);
+          const data = ctx.getImageData(0, 0, 48, 48).data;
+          for (let i = 0; i < data.length; i += 4) {
+            const r = data[i], g = data[i + 1], b = data[i + 2];
+            const [h, s, l] = rgbToHsl(r, g, b);
+            totalL += l;
+            if (h < 65 || h > 320) totalWarm++;
+            pixelCount++;
+            // Skip near-pure white paper border for main color extraction unless image is mostly white
+            if (l > 95 && s < 8) continue;
+            const label = nameLuxuryColor(r, g, b);
+            const cur = buckets.get(label) || { count: 0, rSum: 0, gSum: 0, bSum: 0 };
+            cur.count++; cur.rSum += r; cur.gSum += g; cur.bSum += b;
+            buckets.set(label, cur);
+          }
+          resolve();
+        };
+        img.src = art.dataUrl;
+      }));
+
+      Promise.all(promises).then(() => {
+        const sorted = [...buckets.entries()]
+          .sort((a, b) => b[1].count - a[1].count)
+          .slice(0, 5)
+          .map(([label, val]) => ({
+            label,
+            rgb: `rgb(${Math.round(val.rSum / val.count)}, ${Math.round(val.gSum / val.count)}, ${Math.round(val.bSum / val.count)})`
+          }));
+
+        state.detectedSwatches = sorted;
+        const avgL = pixelCount ? totalL / pixelCount : 65;
+        const warmRatio = pixelCount ? totalWarm / pixelCount : 0.5;
+
+        const toneText = `${avgL > 62 ? "Light & Airy" : avgL < 38 ? "Rich Contrast" : "Balanced Mid-Tone"} • ${warmRatio > 0.48 ? "Warm Undertones" : "Cool / Crisp Undertones"}`;
+        document.getElementById("toneLabel").textContent = toneText;
+
+        const swatchRow = document.getElementById("swatchRow");
+        swatchRow.innerHTML = sorted.map(sw => `
+          <span class="inline-flex items-center gap-1.5 text-[11px] bg-white border border-stone-200 rounded-full px-2 py-0.5">
+            <span class="w-3 h-3 rounded-full border border-stone-300" style="background:${sw.rgb}"></span>
+            ${sw.label}
+          </span>
+        `).join("");
+        document.getElementById("swatchSection").classList.remove("hidden");
+
+        // Auto-populate evaluated colors & frame recommendation
+        if (sorted.length) {
+          document.getElementById("evalColors").value = sorted.map(s => s.label).join(", ");
+        }
+        if (avgL < 42) {
+          document.getElementById("evalFrame").value = warmRatio > 0.45 ? "warm walnut or brushed champagne brass" : "sleek matte black or warm natural oak";
+        } else if (warmRatio > 0.5) {
+          document.getElementById("evalFrame").value = "light natural white oak or slim brushed champagne gold";
+        } else {
+          document.getElementById("evalFrame").value = "bleached light oak or crisp gallery white";
+        }
+
+        renderShots();
+      });
+    }
+
+    // =========================================================================
+    // FILE READING
+    // =========================================================================
+    function readImageFile(file, maxDim = 900) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const img = new Image();
+          img.onload = () => {
+            const canvas = document.createElement("canvas");
+            let w = img.width, h = img.height;
+            if (w > maxDim || h > maxDim) {
+              if (w > h) { h = Math.round(h * maxDim / w); w = maxDim; }
+              else { w = Math.round(w * maxDim / h); h = maxDim; }
+            }
+            canvas.width = w; canvas.height = h;
+            canvas.getContext("2d").drawImage(img, 0, 0, w, h);
+            resolve({ name: file.name, dataUrl: canvas.toDataURL("image/jpeg", 0.86) });
+          };
+          img.onerror = reject;
+          img.src = e.target.result;
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
+
+    function getActiveArtCount() {
+      return state.artFiles.filter(Boolean).length;
+    }
+
+    function getArtPlacementPhrase() {
+      const count = getActiveArtCount();
+      if (count <= 1) return "the attached image to be placed";
+      if (count === 2) return "the attached image to be placed (both attached artworks arranged side-by-side as a balanced matching diptych set)";
+      return "the attached image to be placed (all three attached artworks arranged side-by-side as a balanced matching triptych set of 3)";
+    }
+
+    function getEvalValues() {
+      return {
+        colors: document.getElementById("evalColors").value.trim(),
+        style: document.getElementById("evalStyle").value.trim(),
+        trend: document.getElementById("evalTrend").value.trim(),
+        frame: document.getElementById("evalFrame").value.trim(),
+        props: document.getElementById("evalProps").value.trim()
+      };
+    }
+
+    // =========================================================================
+    // PROMPT COMPILER
+    // =========================================================================
+    function buildAllShots() {
+      const ev = getEvalValues();
+      const artPhrase = getArtPlacementPhrase();
+      const count = getActiveArtCount();
+      const countLabel = count === 3 ? "set of 3 framed prints" : count === 2 ? "set of 2 framed prints" : "single framed print";
+      const shots = [];
+
+      state.rooms.forEach((r, idx) => {
+        if (idx === 0) {
+          shots.push({
+            id: r.id,
+            num: r.num,
+            title: r.title,
+            badge: "HERO MASTER",
+            attachHint: `Attach your ${count || 1} wall art file(s) in AI Studio`,
+            prompt:
+`Create a stunning, ultra-luxurious Interior Design magazine-quality Hero Image in 1:1 aspect ratio featuring ${artPhrase} as a ${countLabel}.
+ARTWORK & FRAME RULES:
+- Use "${artPhrase}" exactly as provided—do not alter, distort, crop, or reinterpret the artwork.
+- The framed art must occupy approximately 80% visual prominence in the composition and each piece must be maximum 24x36 inches in real-world scale.
+- Frame the art in ${ev.frame} with NO MAT inside the frame (full-bleed print to frame edge), realistic glass depth, and subtle realistic inner-frame shadows.
+- The art must look 100% lifelike and naturally integrated into the room.
+ROOM & DECOR STYLING (${r.room}):
+- ${r.specifics}
+- Style the space in ${ev.trend}, matching a ${ev.style} aesthetic.
+- Coordinate all surrounding decor, textiles, ceramics, and ${ev.props} with this color palette: ${ev.colors}.
+LIGHTING & ARCHITECTURE LOCKS:
+- Pure crisp white walls only.
+- NO WINDOWS, NO PASSAGES, NO SKYLIGHTS, AND NO SIDE VIEWS OF OTHER ROOMS.
+- Light, bright, airy natural daylight with minimal soft shadows (no dark corners or heavy contrast).
+- 1:1 square aspect ratio.`
+          });
+        } else {
+          shots.push({
+            id: r.id,
+            num: r.num,
+            title: r.title,
+            badge: "Hero-Anchored",
+            attachHint: "Keep same chat (or attach Art + Hero image)",
+            prompt:
+`Now create a ${r.room} image using the exact same luxury aesthetic, color palette (${ev.colors}), frame finish (${ev.frame}), and ${ev.trend} design language as the Hero image, featuring ${artPhrase} as a ${countLabel}.
+ROOM SPECIFICS:
+- ${r.specifics}
+${INVARIANT_LOCK}`
+          });
+        }
+      });
+
+      shots.push({
+        id: "flatlay",
+        num: "9",
+        title: "Flatlay of Art on Table as Poster",
+        badge: "Uses Saved Ref",
+        refKey: "flatlay",
+        attachHint: "Attach Art + your Flatlay Ref image",
+        prompt:
+`Using the attached Flatlay reference image for camera angle, surface composition, and unframed poster presentation, create a crisp, ultra-luxurious 1:1 flatlay photograph on a light designer table showing ${artPhrase} printed as fine-art matte poster(s) (unframed, no mat).
+Coordinate subtle surrounding flatlay styling props (matching ${ev.colors}, ${ev.props}) with the same ${ev.style} aesthetic as the Hero image.
+Bright, soft diffused natural daylight, minimal soft shadows, clean 1:1 square aspect ratio.`
+      });
+
+      shots.push({
+        id: "printer",
+        num: "10",
+        title: "Image of Art in Printer",
+        badge: "Uses Saved Ref",
+        refKey: "printer",
+        attachHint: "Attach Art + your Printer Ref image",
+        prompt:
+`Using the attached Printer reference image for exact printer perspective and realistic print-studio framing, show ${artPhrase} emerging freshly printed on high-end fine-art matte paper from the printer.
+Keep the surroundings clean, bright, light-toned, and cohesive with the ${ev.colors} and ${ev.style} aesthetic of the Hero image. Bright soft studio daylight, minimal shadows, 100% lifelike paper texture, 1:1 square aspect ratio.`
+      });
+
+      shots.push({
+        id: "frame_oak",
+        num: "11a",
+        title: "Frame Comparison 1/3 — Light Oak Frame",
+        badge: "Locked Base Scene",
+        attachHint: "Attach Art (keep clean so 11b & 11c match identically)",
+        prompt:
+`Create a clean, ultra-luxurious editorial interior vignette (matching the Hero image's ${ev.style} aesthetic, ${ev.colors} palette, and ${ev.trend} styling) displaying ${artPhrase} as a ${countLabel} in a **LIGHT NATURAL OAK** wood frame.
+CRITICAL: Keep composition clean and centered over a minimalist console/sideboard with simple coordinated florals so this exact image can serve as the locked base for White and Black frame comparisons.
+${INVARIANT_LOCK}`
+      });
+
+      shots.push({
+        id: "frame_white",
+        num: "11b",
+        title: "Frame Comparison 2/3 — White Frame (Exact Same Image)",
+        badge: "Edit from 11a",
+        attachHint: "Attach Image 11a you just generated",
+        prompt:
+`Using the attached Shot 11a (Light Oak Frame) image as the exact locked base, keep the ENTIRE room, camera angle, lighting, shadows, furniture, florals, white walls, and ${artPhrase} 100% pixel-identical.
+ONLY change the picture frame finish from light oak to a crisp **MATTE GALLERY WHITE** frame. No mat inside the frame. 1:1 square aspect ratio.`
+      });
+
+      shots.push({
+        id: "frame_black",
+        num: "11c",
+        title: "Frame Comparison 3/3 — Black Frame (Exact Same Image)",
+        badge: "Edit from 11a",
+        attachHint: "Attach Image 11a you just generated",
+        prompt:
+`Using the attached Shot 11a (Light Oak Frame) image as the exact locked base, keep the ENTIRE room, camera angle, lighting, shadows, furniture, florals, white walls, and ${artPhrase} 100% pixel-identical.
+ONLY change the picture frame finish from light oak to a sleek **MATTE BLACK** frame. No mat inside the frame. 1:1 square aspect ratio.`
+      });
+
+      shots.push({
+        id: "side_perspective",
+        num: "12",
+        title: "Side Perspective Image",
+        badge: "Uses Saved Ref",
+        refKey: "side_perspective",
+        attachHint: "Attach Art + your Side Perspective Ref image",
+        prompt:
+`Using the attached Side Perspective reference image for the exact angled camera viewpoint and frame profile depth, showcase ${artPhrase} framed in ${ev.frame} (NO mat inside the frame) hanging on a pure crisp white wall.
+Keep the subtle visible foreground/decor cohesive with the Hero image's ${ev.colors} and ${ev.style} aesthetic. Realistic subtle shadow behind the frame, bright airy lighting, no windows or passages, 1:1 square aspect ratio.`
+      });
+
+      shots.push({
+        id: "rolled_open",
+        num: "13",
+        title: "Art Being Rolled Open by Model",
+        badge: "Uses Saved Ref",
+        refKey: "rolled_open",
+        attachHint: "Attach Art + your Model Rolling Ref image",
+        prompt:
+`Using the attached Model Rolling reference image for exact hand pose, lighting, and paper curl realism, show a model gently unrolling ${artPhrase} printed on luxurious heavyweight matte fine-art paper.
+Style the model's neutral luxury attire and bright minimal backdrop to harmonize with the Hero image's ${ev.colors} and ${ev.style} aesthetic. Crisp lifelike paper texture, soft bright daylight, minimal shadows, 1:1 square aspect ratio.`
+      });
+
+      shots.push({
+        id: "inboxing",
+        num: "14",
+        title: "Inboxing / Gifting Image",
+        badge: "Hero-Anchored",
+        attachHint: "Keep same chat (or attach Art + Hero image)",
+        prompt:
+`Now create an ultra-luxurious, bright gifting and unboxing scene using the same ${ev.style} aesthetic and ${ev.colors} color palette as the Hero image, featuring ${artPhrase} neatly presented as a fine-art print gift set inside an open luxury presentation box / protective folio with crisp tissue paper, subtle satin ribbon, and fresh botanical stem accents on a light surface.
+Pure light neutral backdrop, soft airy daylight, minimal shadows, magazine-quality lifestyle photography, 1:1 square aspect ratio.`
+      });
+
+      return shots;
+    }
+
+    // =========================================================================
+    // RENDER UI
+    // =========================================================================
+    function renderArtSlots() {
+      const container = document.getElementById("artSlots");
+      container.innerHTML = "";
+      state.artFiles.forEach((art, idx) => {
+        const div = document.createElement("div");
+        div.className = "border-2 border-dashed border-stone-300 rounded-xl p-2 flex flex-col items-center justify-center text-center min-h-[115px] relative bg-stone-50/60";
+        if (art) {
+          div.innerHTML = `
+            <img src="${art.dataUrl}" class="w-full h-24 object-contain rounded-lg mb-1" />
+            <span class="text-[11px] text-stone-600 truncate w-full px-1">Piece ${idx + 1}</span>
+            <button data-remove-art="${idx}" class="absolute top-1 right-1 bg-white/90 text-rose-600 rounded-full w-5 h-5 text-xs border border-stone-200 hover:bg-rose-50">&times;</button>
+          `;
+        } else {
+          div.innerHTML = `
+            <label class="cursor-pointer w-full h-full flex flex-col items-center justify-center py-4">
+              <span class="text-xl text-stone-400 mb-1">+</span>
+              <span class="text-xs font-medium text-stone-600">Art Piece ${idx + 1}</span>
+              <span class="text-[10px] text-stone-400">${idx === 0 ? "Upload" : "Optional"}</span>
+              <input type="file" accept="image/*" class="hidden" data-upload-art="${idx}" />
+            </label>
+          `;
+        }
+        container.appendChild(div);
+      });
+      document.getElementById("pieceCountBadge").textContent = `${getActiveArtCount()} / 3 uploaded`;
+    }
+
+    function renderRefVault() {
+      const grid = document.getElementById("refVaultGrid");
+      grid.innerHTML = "";
+      REF_VAULT_SLOTS.forEach(slot => {
+        const saved = state.refVault[slot.key];
+        const card = document.createElement("div");
+        card.className = "border border-stone-200 rounded-xl p-3 bg-stone-50/50 flex flex-col justify-between gap-2";
+        card.innerHTML = `
+          <div>
+            <div class="text-xs font-semibold text-stone-800">${slot.label}</div>
+            <div class="text-[11px] text-stone-500">${slot.desc}</div>
+          </div>
+          ${saved
+            ? `<div class="relative">
+                 <img src="${saved.dataUrl}" class="w-full h-24 object-cover rounded-lg border border-stone-200" />
+                 <button data-remove-ref="${slot.key}" class="absolute top-1 right-1 bg-white/90 text-rose-600 rounded-full w-5 h-5 text-xs border">&times;</button>
+               </div>`
+            : `<label class="cursor-pointer border-2 border-dashed border-stone-300 rounded-lg h-24 flex flex-col items-center justify-center text-xs text-stone-500 hover:bg-white">
+                 <span>+ Upload Ref</span>
+                 <input type="file" accept="image/*" class="hidden" data-upload-ref="${slot.key}" />
+               </label>`
+          }
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    function renderRoomEditor() {
+      const grid = document.getElementById("roomEditorGrid");
+      grid.innerHTML = "";
+      state.rooms.forEach((r, i) => {
+        const box = document.createElement("div");
+        box.className = "border border-stone-200 rounded-lg p-3 bg-stone-50 space-y-2";
+        box.innerHTML = `
+          <div class="flex items-center gap-2">
+            <span class="text-xs font-bold text-stone-500">#${r.num}</span>
+            <input type="text" value="${r.room.replace(/"/g, '&quot;')}" data-room-name="${i}"
+              class="flex-1 text-xs font-medium border border-stone-300 rounded px-2 py-1 bg-white" />
+          </div>
+          <textarea rows="2" data-room-spec="${i}"
+            class="w-full text-xs border border-stone-300 rounded px-2 py-1 bg-white">${r.specifics}</textarea>
+        `;
+        grid.appendChild(box);
+      });
+    }
+
+    function updateProgressCounter(shots) {
+      const doneCount = shots.filter(s => state.shotExtras[s.id]?.done).length;
+      document.getElementById("progressCounter").textContent = `${doneCount} / ${shots.length} Done`;
+    }
+
+    function renderShots() {
+      const shots = buildAllShots();
+      const grid = document.getElementById("shotsGrid");
+      grid.innerHTML = "";
+      updateProgressCounter(shots);
+
+      shots.forEach(shot => {
+        const extra = state.shotExtras[shot.id] || {};
+        const promptText = extra.customPrompt || shot.prompt;
+        const savedRef = shot.refKey ? state.refVault[shot.refKey] : null;
+
+        const card = document.createElement("div");
+        card.className = `card p-4 flex flex-col gap-3 ${extra.done ? "shot-done" : ""}`;
+        card.innerHTML = `
+          <div class="flex items-start justify-between gap-2">
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="text-xs font-bold px-2 py-0.5 rounded bg-stone-900 text-white">#${shot.num}</span>
+                <h3 class="font-semibold text-sm text-stone-900">${shot.title}</h3>
+              </div>
+              <div class="flex flex-wrap items-center gap-1.5 mt-1">
+                <span class="text-[10px] font-medium px-2 py-0.5 rounded-full ${
+                  shot.num === "1" ? "bg-amber-100 text-amber-800" : "bg-stone-100 text-stone-600"
+                }">${shot.badge}</span>
+                <span class="text-[11px] text-stone-500">• ${shot.attachHint}</span>
+              </div>
+            </div>
+            <div class="flex items-center gap-1.5 shrink-0">
+              <button data-toggle-done="${shot.id}" class="text-xs border rounded-lg px-2.5 py-1 ${
+                extra.done ? "bg-emerald-600 text-white border-emerald-600" : "border-stone-300 hover:bg-stone-50"
+              }">
+                ${extra.done ? "✓ Done" : "Mark Done"}
+              </button>
+              <button data-copy-shot="${shot.id}" class="btn-dark text-xs rounded-lg px-3 py-1">
+                📋 Copy Prompt
+              </button>
+            </div>
+          </div>
+
+          ${savedRef ? `
+            <div class="flex items-center justify-between gap-2 bg-emerald-50 border border-emerald-200 rounded-lg px-2.5 py-1.5">
+              <div class="flex items-center gap-2">
+                <img src="${savedRef.dataUrl}" class="w-9 h-9 rounded object-cover border border-emerald-300" />
+                <span class="text-[11px] text-emerald-800 font-medium">Saved Reference ready to attach in AI Studio</span>
+              </div>
+              <a href="${savedRef.dataUrl}" download="ref_${shot.refKey}.jpg" class="text-[11px] text-emerald-900 underline font-medium">Download Ref</a>
+            </div>
+          ` : (shot.refKey ? `
+            <div class="text-[11px] text-amber-800 bg-amber-50 border border-amber-200 rounded-lg px-2.5 py-1.5">
+              ⚠️ Upload your "${shot.refKey}" reference photo in Section 3 above so it stays ready here.
+            </div>
+          ` : "")}
+
+          <textarea rows="6" data-prompt-box="${shot.id}"
+            class="w-full text-xs font-mono leading-relaxed border border-stone-200 rounded-lg p-2.5 bg-stone-50/70 focus:bg-white focus:outline-none focus:border-stone-400">${promptText}</textarea>
+
+          <!-- Request Change / Extra Reference -->
+          <div class="border-t border-stone-100 pt-2.5 flex flex-wrap items-center gap-2">
+            <label class="cursor-pointer text-[11px] border border-stone-300 rounded-md px-2 py-1 hover:bg-stone-50">
+              ${extra.hasExtraRef ? "✓ Extra Ref Noted" : "+ Note Extra Ref"}
+              <input type="file" accept="image/*" class="hidden" data-shot-ref="${shot.id}" />
+            </label>
+            <input type="text" placeholder="Request change (e.g., softer flowers, warmer oak, add throw)..."
+              value="${(extra.changeNote || "").replace(/"/g, '&quot;')}" data-shot-change="${shot.id}"
+              class="flex-1 min-w-[180px] text-xs border border-stone-300 rounded-md px-2.5 py-1" />
+            <button data-apply-change="${shot.id}" class="text-xs bg-stone-800 text-white rounded-md px-2.5 py-1 hover:bg-stone-900">
+              Update Prompt
+            </button>
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    // =========================================================================
+    // EVENTS
+    // =========================================================================
+    document.addEventListener("change", async (e) => {
+      if (e.target.dataset.uploadArt !== undefined) {
+        const idx = Number(e.target.dataset.uploadArt);
+        const file = e.target.files[0];
+        if (!file) return;
+        state.artFiles[idx] = await readImageFile(file, 900);
+        renderArtSlots();
+        evaluateUploadedArtworks();
+      }
+      if (e.target.dataset.uploadRef) {
+        const key = e.target.dataset.uploadRef;
+        const file = e.target.files[0];
+        if (!file) return;
+        state.refVault[key] = await readImageFile(file, 768);
+        try { localStorage.setItem("igda_refVault", JSON.stringify(state.refVault)); } catch (_) {}
+        renderRefVault();
+        renderShots();
+      }
+      if (e.target.dataset.shotRef) {
+        const id = e.target.dataset.shotRef;
+        if (!e.target.files[0]) return;
+        state.shotExtras[id] = { ...(state.shotExtras[id] || {}), hasExtraRef: true };
+        renderShots();
+      }
+      if (e.target.id === "roomPack" && ROOM_PACKS[e.target.value]) {
+        state.rooms = JSON.parse(JSON.stringify(ROOM_PACKS[e.target.value]));
+        renderRoomEditor();
+        renderShots();
+      }
+    });
+
+    document.addEventListener("input", (e) => {
+      if (e.target.dataset.roomName !== undefined) {
+        state.rooms[Number(e.target.dataset.roomName)].room = e.target.value;
+        document.getElementById("roomPack").value = "custom";
+      }
+      if (e.target.dataset.roomSpec !== undefined) {
+        state.rooms[Number(e.target.dataset.roomSpec)].specifics = e.target.value;
+        document.getElementById("roomPack").value = "custom";
+      }
+      if (e.target.dataset.shotChange) {
+        const id = e.target.dataset.shotChange;
+        state.shotExtras[id] = { ...(state.shotExtras[id] || {}), changeNote: e.target.value };
+      }
+      if (e.target.dataset.promptBox) {
+        const id = e.target.dataset.promptBox;
+        state.shotExtras[id] = { ...(state.shotExtras[id] || {}), customPrompt: e.target.value };
+      }
+    });
+
+    document.addEventListener("click", async (e) => {
+      if (e.target.dataset.removeArt !== undefined) {
+        state.artFiles[Number(e.target.dataset.removeArt)] = null;
+        renderArtSlots();
+        evaluateUploadedArtworks();
+      }
+      if (e.target.dataset.removeRef) {
+        delete state.refVault[e.target.dataset.removeRef];
+        localStorage.setItem("igda_refVault", JSON.stringify(state.refVault));
+        renderRefVault();
+        renderShots();
+      }
+      if (e.target.dataset.vibe) {
+        const v = VIBE_CONFIGS[e.target.dataset.vibe];
+        document.querySelectorAll(".vibe-btn").forEach(b => b.classList.remove("ring-2", "ring-stone-800"));
+        e.target.classList.add("ring-2", "ring-stone-800");
+        document.getElementById("evalStyle").value = v.style;
+        document.getElementById("evalTrend").value = v.trend;
+        document.getElementById("evalProps").value = v.props;
+        if (v.pack && ROOM_PACKS[v.pack]) {
+          document.getElementById("roomPack").value = v.pack;
+          state.rooms = JSON.parse(JSON.stringify(ROOM_PACKS[v.pack]));
+          renderRoomEditor();
+        }
+        renderShots();
+      }
+      if (e.target.dataset.copyShot) {
+        const id = e.target.dataset.copyShot;
+        const text = document.querySelector(`[data-prompt-box="${id}"]`).value;
+        await navigator.clipboard.writeText(text);
+        e.target.textContent = "✓ Copied!";
+        setTimeout(() => (e.target.textContent = "📋 Copy Prompt"), 1200);
+      }
+      if (e.target.dataset.toggleDone) {
+        const id = e.target.dataset.toggleDone;
+        const cur = state.shotExtras[id]?.done || false;
+        state.shotExtras[id] = { ...(state.shotExtras[id] || {}), done: !cur };
+        renderShots();
+      }
+      if (e.target.dataset.applyChange) {
+        const id = e.target.dataset.applyChange;
+        const note = (state.shotExtras[id]?.changeNote || "").trim();
+        const base = buildAllShots().find(s => s.id === id).prompt;
+        const extraRefLine = state.shotExtras[id]?.hasExtraRef ? "\n- Use the newly attached extra reference image for layout/styling cues." : "";
+        const updated = note || extraRefLine
+          ? `${base}\n\nADDITIONAL REVISION REQUEST:${note ? `\n- ${note}` : ""}${extraRefLine}`
+          : base;
+        state.shotExtras[id] = { ...(state.shotExtras[id] || {}), customPrompt: updated };
+        renderShots();
+      }
+    });
+
+    document.getElementById("copyEvalHelperBtn").onclick = async () => {
+      const helperPrompt =
+`Look at my attached wall art. Do NOT describe what is drawn in the art. Instead, tell me in 5 short lines:
+1. Best 4 interior decor colors matching this art
+2. Interior style vibe (e.g., Coastal, Botanical, Nursery, Modern Abstract, Moody)
+3. Best 2027 decor trend & textures
+4. Best frame finish (e.g., light oak, champagne gold, matte black)
+5. Best fresh flowers & props to style around it`;
+      await navigator.clipboard.writeText(helperPrompt);
+      const btn = document.getElementById("copyEvalHelperBtn");
+      btn.textContent = "✓ Copied for Gemini!";
+      setTimeout(() => (btn.textContent = "✨ Copy Free Gemini Evaluator"), 1500);
+    };
+
+    document.getElementById("clearRefsBtn").onclick = () => {
+      state.refVault = {};
+      localStorage.removeItem("igda_refVault");
+      renderRefVault();
+      renderShots();
+    };
+
+    document.getElementById("toggleRoomEditorBtn").onclick = () => {
+      document.getElementById("roomEditorGrid").classList.toggle("hidden");
+    };
+
+    document.getElementById("rebuildPromptsBtn").onclick = renderShots;
+
+    document.getElementById("resetListingBtn").onclick = () => {
+      state.artFiles = [null, null, null];
+      state.shotExtras = {};
+      document.getElementById("swatchSection").classList.add("hidden");
+      renderArtSlots();
+      renderShots();
+    };
+
+    document.getElementById("copyAllBtn").onclick = async () => {
+      const boxes = [...document.querySelectorAll("[data-prompt-box]")];
+      const allText = boxes.map(b => `=== SHOT ${b.dataset.promptBox.toUpperCase()} ===\n${b.value}`).join("\n\n");
+      await navigator.clipboard.writeText(allText);
+      const btn = document.getElementById("copyAllBtn");
+      btn.textContent = "✓ All 16 Copied!";
+      setTimeout(() => (btn.textContent = "📋 Copy All 16 Prompts"), 1500);
+    };
+
+    // Init
+    renderArtSlots();
+    renderRefVault();
+    renderRoomEditor();
+    renderShots();
+  </script>
+</body>
+</html>
